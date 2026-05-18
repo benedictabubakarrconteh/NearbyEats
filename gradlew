@@ -108,61 +108,33 @@ if [ "$cygwin" = "false" -a "$msys" = "false" ] && command -v ulimit >/dev/null 
     if [ "$nonstop" = "true" ] ; then
         ulimit -S -n "$MAX_FD" || warn "Could not set maximum file descriptor limit: $MAX_FD"
     else
-        ulimit -n "$MAX_FD" || warn "Could not set maximum file descriptor limit: $MAX_FD"
+    #!/usr/bin/env sh
+
+APP_HOME="$(cd "$(dirname "$0")" && pwd)"
+CLASSPATH=$APP_HOME/gradle/wrapper/gradle-wrapper.jar
+
+if [ -n "$JAVA_HOME" ] ; then
+    if [ -x "$JAVA_HOME/bin/java" ] ; then
+        JAVACMD="$JAVA_HOME/bin/java"
+    else
+        JAVACMD="$JAVA_HOME/jre/bin/java"
     fi
+    if [ ! -x "$JAVACMD" ] ; then
+        echo "ERROR: JAVA_HOME is set to an invalid directory: $JAVA_HOME"
+        exit 1
+    fi
+else
+    JAVACMD="java"
+    which java >/dev/null 2>&1 || {
+        echo "ERROR: JAVA_HOME is not set and no 'java' command could be found in your PATH."
+        exit 1
+    }
 fi
 
-# Collect all arguments for the java command, stacking in reverse order:
-#   * args from the command line
-#   * the main class name
-#   * -classpath
-#   * -D...system properties
-#   * all other JVM cmd args
+DEFAULT_JVM_OPTS='"-Xmx64m" "-Xms64m"'
+GRADLE_OPTS=${GRADLE_OPTS:-}
+GRADLE_APP_NAME="Gradle"
 
-# For Cygwin or MSYS, switch paths to Windows format before running java
-if [ "$cygwin" = "true" -o "$msys" = "true" ] ; then
-    APP_HOME=`cygpath --path --mixed "$APP_HOME"`
-    CLASSPATH=`cygpath --path --mixed "$CLASSPATH"`
+eval "set -- $DEFAULT_JVM_OPTS $JAVA_OPTS $GRADLE_OPTS"
 
-    JAVACMD=`cygpath --windows "$JAVACMD"`
-
-    # We build the pattern for arguments to be converted via cygpath
-    ROOTDIRSRAW=`find -L / -maxdepth 3 -type d -name root 2>/dev/null`
-    SEP=""
-    for dir in $ROOTDIRSRAW ; do
-        ROOTDIRS="$ROOTDIRS$SEP$dir"
-        SEP="|"
-    done
-    OURCYGPATTERN="(^($ROOTDIRS))"
-    OURCYGPATTERN="(^($ROOTDIRS))(/$)"
-    # Add a user-defined pattern to the cygpath arguments
-    if [ "$GRADLE_CYGPATTERN" != "" ] ; then
-        OURCYGPATTERN="$OURCYGPATTERN|($GRADLE_CYGPATTERN)"
-    fi
-    # Now convert the arguments - kludge to limit ourselves to /bin/sh
-    i=0
-    for arg in "$@" ; do
-        CHECK=`echo "$arg"|egrep -c "$OURCYGPATTERN" -`
-        CHECK2=`echo "$arg"|egrep -c "^-"`                                 ### Determine if an option
-
-        if [ $CHECK -ne 0 ] && [ $CHECK2 -eq 0 ] ; then                    ### Added a condition
-            arg=`cygpath --path --unix "$arg"`
-        fi
-        GRADLE_ARGS="$GRADLE_ARGS \"$arg\""
-    done
-    # Now convert the arguments to proper form before passing them
-    eval "set -- $GRADLE_ARGS"
-
-fi
-
-# Escape application args
-save () {
-    for i do printf %s\\n "$i" | sed "s/'/'\\\\''/g;1s/^/'/;\$s/\$/' \\\\/" ; done
-    echo " "
-}
-APP_ARGS=`save "$@"`
-
-# Collect all arguments for the java command, following the shell quoting and substitution rules
-eval "set -- $DEFAULT_JVM_OPTS $JAVA_OPTS $GRADLE_OPTS \"\$APP_JAR\" \"\$@\""
-
-exec "$JAVACMD" "$@"
+exec "$JAVACMD" -classpath "$CLASSPATH" org.gradle.wrapper.GradleWrapperMain "$@"
