@@ -1,0 +1,10 @@
+package com.nearbyeats
+
+data class Restaurant(
+    val name: String,
+    val vicinity: String
+)
+
+data class PlacesResponse(
+    val results: List<Restaurant>
+)
